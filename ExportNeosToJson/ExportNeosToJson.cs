@@ -53,12 +53,14 @@ namespace ExportNeosToJson
             string extension = Path.GetExtension(targetFile).Substring(1).ToUpper();
             if (EXTENSION_7ZBSON.Equals(extension))
             {
-                __result = Export7zbson(slot, targetFile);
+                SavedGraph graph = slot.SaveObject(DependencyHandling.CollectAssets);
+                __result = Export7zbson(graph, targetFile);
                 return false; // skip original function
             }
             else if (EXTENSION_JSON.Equals(extension))
             {
-                __result = ExportJson(slot, targetFile);
+                SavedGraph graph = slot.SaveObject(DependencyHandling.CollectAssets);
+                __result = ExportJson(graph, targetFile);
                 return false; // skip original function
             }
             else
@@ -67,24 +69,22 @@ namespace ExportNeosToJson
             }
         }
 
-        private static async Task<bool> Export7zbson(Slot slot, string targetFile)
+        private static async Task<bool> Export7zbson(SavedGraph graph, string targetFile)
         {
             await new ToBackground();
-            SavedGraph graph = slot.SaveObject(DependencyHandling.CollectAssets);
             using (FileStream fileStream = File.OpenWrite(targetFile))
             {
                 DataTreeConverter.To7zBSON(graph.Root, fileStream);
             }
-            Msg(string.Format("exported {0} to {1}", slot.Name, targetFile));
+            Msg(string.Format("exported {0}", targetFile));
             return true;
         }
 
-        private static async Task<bool> ExportJson(Slot slot, string targetFile)
+        private static async Task<bool> ExportJson(SavedGraph graph, string targetFile)
         {
             await new ToBackground();
-            SavedGraph graph = slot.SaveObject(DependencyHandling.CollectAssets);
             File.WriteAllText(targetFile, DataTreeConverter.ToJSON(graph.Root));
-            Msg(string.Format("exported {0} to {1}", slot.Name, targetFile));
+            Msg(string.Format("exported {0}", targetFile));
             return true;
         }
     }

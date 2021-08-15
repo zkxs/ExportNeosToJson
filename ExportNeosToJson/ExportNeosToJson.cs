@@ -1,32 +1,35 @@
-﻿using MelonLoader;
+﻿using BaseX;
+using FrooxEngine;
 using HarmonyLib;
+using NeosModLoader;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FrooxEngine;
-using System.Reflection;
 using System.IO;
-using BaseX;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace ExportNeosToJson
 {
-    public class ExportNeosToJson : MelonMod
+    public class ExportNeosToJson : NeosMod
     {
+        public override string Name => "ExportNeosToJson";
+        public override string Author => "runtime";
+        public override string Version => "1.0.0";
+        public override string Link => "https://github.com/zkxs/ExportNeosToJson";
+
         private static readonly string EXTENSION_7ZBSON = "7ZBSON";
         private static readonly string EXTENSION_JSON = "JSON";
 
-        public override void OnApplicationStart()
+        public override void OnEngineInit()
         {
-            HarmonyLib.Harmony harmony = new HarmonyLib.Harmony("net.michaelripley.ExportNeosToJson");
+            Harmony harmony = new Harmony("net.michaelripley.ExportNeosToJson");
             FieldInfo formatsField = AccessTools.DeclaredField(typeof(ModelExportable), "formats");
             if (formatsField == null)
             {
-                MelonLogger.Error("could not read ModelExportable.formats");
+                Error("could not read ModelExportable.formats");
                 return;
             }
-            
+
             // inject addional formats
             List<string> modelFormats = new List<string>((string[])formatsField.GetValue(null));
             modelFormats.Add("7ZBSON");
@@ -36,13 +39,13 @@ namespace ExportNeosToJson
             MethodInfo exportModelOriginal = AccessTools.DeclaredMethod(typeof(ModelExporter), nameof(ModelExporter.ExportModel), new Type[] { typeof(Slot), typeof(string) });
             if (exportModelOriginal == null)
             {
-                MelonLogger.Error("Could not find ModelExporter.ExportModel(Slot, string)");
+                Error("Could not find ModelExporter.ExportModel(Slot, string)");
                 return;
             }
             MethodInfo exportModelPrefix = AccessTools.DeclaredMethod(typeof(ExportNeosToJson), nameof(ExportModelPrefix));
             harmony.Patch(exportModelOriginal, prefix: new HarmonyMethod(exportModelPrefix));
 
-            MelonLogger.Msg("Hook installed successfully");
+            Msg("Hook installed successfully");
         }
 
         private static bool ExportModelPrefix(Slot slot, string targetFile, ref Task<bool> __result)
@@ -72,7 +75,7 @@ namespace ExportNeosToJson
             {
                 DataTreeConverter.To7zBSON(graph.Root, fileStream);
             }
-            MelonLogger.Msg(string.Format("exported {0} to {1}", slot.Name, targetFile));
+            Msg(string.Format("exported {0} to {1}", slot.Name, targetFile));
             return true;
         }
 
@@ -81,7 +84,7 @@ namespace ExportNeosToJson
             await new ToBackground();
             SavedGraph graph = slot.SaveObject(DependencyHandling.CollectAssets);
             File.WriteAllText(targetFile, DataTreeConverter.ToJSON(graph.Root));
-            MelonLogger.Msg(string.Format("exported {0} to {1}", slot.Name, targetFile));
+            Msg(string.Format("exported {0} to {1}", slot.Name, targetFile));
             return true;
         }
     }

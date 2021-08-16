@@ -10,3 +10,6 @@ A [NeosModLoader](https://github.com/zkxs/NeosModLoader) mod for [Neos VR](https
 ## FAQ
 ### What does this actually do?
 It injects additional 7zbson and json options into the export dialog.
+
+### Is this against guidelines?
+Maybe. [Read more](https://github.com/zkxs/NeosModLoader/blob/master/doc/neos_guidelines.md).

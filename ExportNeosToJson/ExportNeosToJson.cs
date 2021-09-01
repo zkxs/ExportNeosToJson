@@ -63,7 +63,7 @@ namespace ExportNeosToJson
                     return false; // skip original function
                 case "LZ4BSON":
                     graph = slot.SaveObject(DependencyHandling.CollectAssets);
-                    __result = ExportLz74bson(graph, targetFile);
+                    __result = ExportLz4bson(graph, targetFile);
                     return false; // skip original function
                 case "BSON":
                     graph = slot.SaveObject(DependencyHandling.CollectAssets);
@@ -93,7 +93,7 @@ namespace ExportNeosToJson
             return true; // call original function
         }
 
-        private static async Task<bool> ExportLz74bson(SavedGraph graph, string targetFile)
+        private static async Task<bool> ExportLz4bson(SavedGraph graph, string targetFile)
         {
             await new ToBackground();
             using (FileStream fileStream = File.OpenWrite(targetFile))

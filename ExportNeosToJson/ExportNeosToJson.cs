@@ -14,7 +14,7 @@ namespace ExportNeosToJson
     {
         public override string Name => "ExportNeosToJson";
         public override string Author => "runtime";
-        public override string Version => "1.1.0";
+        public override string Version => "1.1.1";
         public override string Link => "https://github.com/zkxs/ExportNeosToJson";
 
 
@@ -36,10 +36,13 @@ namespace ExportNeosToJson
             modelFormats.Add("LZ4BSON");
             formatsField.SetValue(null, modelFormats.ToArray());
 
-            MethodInfo exportModelOriginal = AccessTools.DeclaredMethod(typeof(ModelExporter), nameof(ModelExporter.ExportModel), new Type[] { typeof(Slot), typeof(string) });
+            MethodInfo exportModelOriginal = AccessTools.DeclaredMethod(typeof(ModelExporter), nameof(ModelExporter.ExportModel), new Type[] {
+                typeof(Slot),
+                typeof(string),
+                typeof(Predicate<Component>) });
             if (exportModelOriginal == null)
             {
-                Error("Could not find ModelExporter.ExportModel(Slot, string)");
+                Error("Could not find ModelExporter.ExportModel(Slot, string, Predicate<Component>)");
                 return;
             }
             MethodInfo exportModelPrefix = AccessTools.DeclaredMethod(typeof(ExportNeosToJson), nameof(ExportModelPrefix));
@@ -48,11 +51,12 @@ namespace ExportNeosToJson
             Msg("Hook installed successfully");
         }
 
-        private static bool ExportModelPrefix(Slot slot, string targetFile, ref Task<bool> __result)
+        private static bool ExportModelPrefix(Slot slot, string targetFile, Predicate<Component> filter, ref Task<bool> __result)
         {
             string extension = Path.GetExtension(targetFile).Substring(1).ToUpper();
             SavedGraph graph;
-            switch (extension) {
+            switch (extension)
+            {
                 case "7ZBSON":
                     graph = slot.SaveObject(DependencyHandling.CollectAssets);
                     __result = Export7zbson(graph, targetFile);
